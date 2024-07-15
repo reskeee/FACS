@@ -1,8 +1,17 @@
 from fastapi import FastAPI, UploadFile
 import aiofiles
 from db_interaction import *
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 async def page():
@@ -151,3 +160,13 @@ async def delete_jobs(id: int):
     session.delete(record_for_delete)
     session.commit()
 
+@app.post("/add_event")
+async def add_event(user_id: int, location_id: int, timestamp: str):
+    new_event = Events(
+        user_id=user_id,
+        location_id=location_id,
+        timestamp=timestamp
+    )
+
+    session.add(new_event)
+    session.commit()
