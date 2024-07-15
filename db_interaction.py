@@ -33,7 +33,7 @@ class Events(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int]
-    locaton_id: Mapped[int]
+    location_id: Mapped[int]
     timestamp: Mapped[str]
 
     def __repr__(self) -> str:
@@ -83,52 +83,3 @@ class Jobs(Base):
 
 engine = create_engine("sqlite:///test.db", echo=True)
 session = Session(engine)
-
-# Base.metadata.create_all(engine)
-
-
-# with Session(engine) as session:
-    # user1 = Users(
-    #     name="Руслан",
-    #     surname="Хаирбеков",
-    #     lastname="Чеченец",
-    #     position_id=1,
-    #     age=15,
-    #     location_id=3,
-    #     job_id=2
-    # )
-    # user2 = Users(
-    #     name="Мизеахмед",
-    #     surname="бабахов",
-    #     lastname="ывапролдж",
-    #     position_id=4,
-    #     age=17,
-    #     location_id=2,
-    #     job_id=34
-    # )
-    # user3 = Users(
-    #     name="длптшз",
-    #     surname="аапрапт",
-    #     lastname="ыыыыыыыыы",
-    #     position_id=15,
-    #     age=1,
-    #     location_id=54,
-    #     job_id=26
-    # )
-
-    # job1 = Jobs(
-    #     title="Преподаватель"
-    # )
-    # job2 = Jobs(
-    #     title="Директор"
-    # )
-    # job3 = Jobs(
-    #     title="Работяга"
-    # )
-
-    # session.add_all([job1, job2, job3])
-
-    # session.commit()
-
-# if __name__ == "__main__":
-#     print(asyncio.run(get_user_data(3)))
