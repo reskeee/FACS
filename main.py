@@ -81,7 +81,6 @@ async def get_jobs():
                    for job in session.scalars(stmt)]
 
     return jobs_list
-    
 
 
 @app.get("/events")
@@ -180,6 +179,7 @@ async def delete_jobs(id: int):
     record_for_delete = session.get(Jobs, id)
     session.delete(record_for_delete)
     session.commit()
+
 
 @app.post("/events/add")
 async def add_event(user_id: int, location_id: int, timestamp: str):
