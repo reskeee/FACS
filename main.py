@@ -1,5 +1,6 @@
 from fastapi import FastAPI, UploadFile, WebSocket
 import aiofiles
+import os
 from db_interaction import *
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -97,10 +98,22 @@ async def get_events():
 
 
 @app.put("/put_image/")
-async def upload_image(file: UploadFile, user_id: int): #TODO Сделать запись в БД
-    async with aiofiles.open("C:/Users/reskeee/Desktop/GazpronmProject/test/test.png", "wb") as out_file:
+async def upload_image(file: UploadFile, user_id: int):
+    if not (str(user_id) in os.listdir('images')):
+        os.mkdir(f'images/{user_id}')
+
+    filepath = f"images/{user_id}/{file.filename}"
+    async with aiofiles.open(filepath, "wb") as out_file:
         content = await file.read()
         await out_file.write(content)
+
+    new_image_path = Images(
+        user_id=user_id,
+        path=filepath
+    )
+
+    session.add(new_image_path)
+    session.commit()
 
 
 @app.post("/locations/create")
