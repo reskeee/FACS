@@ -1,6 +1,7 @@
 import os
 import aiofiles
 import datetime as dt
+import sqlalchemy.exc
 from db_interaction import *
 from fastapi import FastAPI, UploadFile, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
@@ -101,7 +102,19 @@ async def get_events():
     return events_list 
 
 
-@app.put("/put_image") 
+@app.get("/image")
+async def get_image(id: int):
+    try:
+        stmt = select(Images).where(Images.id == id)
+        image_path = session.scalars(stmt).one().path
+
+    # async with aiofiles.open()
+        return image_path
+    except sqlalchemy.exc.NoResultFound:
+        return "No result found"
+    
+
+@app.put("/image/put") 
 async def upload_image(file: UploadFile, user_id: int):
     if not (str(user_id) in os.listdir('images')):
         os.mkdir(f'images/{user_id}')
@@ -118,6 +131,18 @@ async def upload_image(file: UploadFile, user_id: int):
 
     session.add(new_image_path)
     session.commit()
+
+
+@app.delete("/image/delete")
+async def image_delete(id: int):
+    record_for_delete = session.get(Users, id)
+
+    image_path = record_for_delete.path
+
+    session.delete(record_for_delete)
+    session.commit()
+
+    os.remove(image_path)
 
 
 @app.post("/user/create")
