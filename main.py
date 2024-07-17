@@ -1,8 +1,10 @@
-from fastapi import FastAPI, UploadFile, WebSocket
-import aiofiles
 import os
+import aiofiles
+import datetime as dt
 from db_interaction import *
+from fastapi import FastAPI, UploadFile, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI()
 
@@ -30,10 +32,11 @@ async def get_user_data(id: int):
         "name": user_data.name,
         "surname": user_data.surname,
         "lastname": user_data.lastname,
-        "position_id": user_data.position_id,
         "age": user_data.age,
+        "position_id": user_data.position_id,
         "location_id": user_data.location_id,
-        "job_id": user_data.job_id
+        "job_id": user_data.job_id,
+        "last_seen": user_data.last_seen
     }
 
 
@@ -45,7 +48,8 @@ async def get_all_users():
                    "name": user.name, 
                    "surname": user.surname, 
                    "lastname": user.lastname, 
-                   "job": user.job_id}
+                   "job": user.job_id, 
+                   "last_seen": user.lasst_seen}
                    for user in session.scalars(stmt)]
 
     return users_list
@@ -97,7 +101,7 @@ async def get_events():
     return events_list 
 
 
-@app.put("/put_image/")
+@app.put("/put_image") 
 async def upload_image(file: UploadFile, user_id: int):
     if not (str(user_id) in os.listdir('images')):
         os.mkdir(f'images/{user_id}')
@@ -113,6 +117,48 @@ async def upload_image(file: UploadFile, user_id: int):
     )
 
     session.add(new_image_path)
+    session.commit()
+
+
+@app.post("/user/create")
+async def add_user(name: str, surname: str, lastname: str, position_id: int, 
+                   age: int, location_id: int, job_id: int, last_seen: str):
+    new_user = Users(
+        name=name,
+        surname=surname,
+        lastname=lastname,
+        position_id=position_id,
+        age=age,
+        location_id=location_id,
+        job_id=job_id,
+        last_seen=last_seen
+    )
+
+    session.add(new_user)
+    session.commit()
+
+
+@app.post("/user/update")
+async def update_user(id: int, name: str, surname: str, lastname: str, 
+                      position_id: int, age: int, location_id: int, job_id: int):
+    stmt = select(Users).where(Users.id == id) 
+    updated_record = session.scalar(stmt).one()
+
+    updated_record.name = name 
+    updated_record.surname = surname
+    updated_record.lastname = lastname
+    updated_record.position_id = position_id
+    updated_record.age = age
+    updated_record.location_id = location_id
+    updated_record.job_id = job_id
+
+    session.commit()
+
+
+@app.post("/user/delete")
+async def delete_user(id: int):
+    record_for_delete = session.get(Users, id)
+    session.delete(record_for_delete)
     session.commit()
 
 

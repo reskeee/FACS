@@ -18,10 +18,11 @@ class Users(Base):
     name: Mapped[str] = mapped_column(String(STRING_LENGTH))
     surname: Mapped[str] = mapped_column(String(STRING_LENGTH))
     lastname: Mapped[str] = mapped_column(String(STRING_LENGTH))
-    position_id: Mapped[int]
     age: Mapped[int]
+    position_id: Mapped[int]
     location_id: Mapped[int]
     job_id: Mapped[int]
+    last_seen: Mapped[str]
 
     def __repr__(self) -> str:
         return f"Users(id={self.id!r}, name={self.name!r}, surname={self.surname!r},\
