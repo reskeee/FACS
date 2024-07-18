@@ -5,7 +5,7 @@ import sqlalchemy.exc
 from db_interaction import *
 from models import *
 from fastapi import FastAPI, UploadFile, WebSocket
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -112,17 +112,9 @@ async def get_events():
     return events_list 
 
 
-@app.get("/image")
-async def get_image(id: int):
-    try:
-        stmt = select(Images).where(Images.id == id)
-        image_path = session.scalars(stmt).one().path
-
-        return image_path
-    
-    except sqlalchemy.exc.NoResultFound:
-        return JSONResponse({"message": "No result found"})
-    
+@app.get("/images/{id}/{src}")
+async def get_image(id: int, src: str):
+    return FileResponse(path=f"images/{id}/{src}")
 
 @app.put("/image/put") 
 async def upload_image(file: UploadFile, user_id: int):
