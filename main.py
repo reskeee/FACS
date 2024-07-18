@@ -34,11 +34,10 @@ async def get_user_data(id: int):
     # stmt1 = select(Images).where(Images.user_id == id)
     # paths = session.scalar(stmt1).path
 
-    stmt = select(Images).where(Images.user_id == id) 
-    paths = session.scalar(stmt).path
-    print(paths)
+    stmt = select(Images)
+    paths = [image.path for image in session.scalars(stmt)]
     return JSONResponse({
-        "id": user_data.id,
+        "id": user_data.id, 
         "name": user_data.name,
         "surname": user_data.surname,
         "lastname": user_data.lastname,
@@ -47,7 +46,7 @@ async def get_user_data(id: int):
         "location_id": user_data.location_id,
         "job_id": user_data.job_id,
         "last_seen": user_data.last_seen,
-        "images": [paths]
+        "images": paths
     })
 
 
