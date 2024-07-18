@@ -3,7 +3,9 @@ import aiofiles
 import datetime as dt
 import sqlalchemy.exc
 from db_interaction import *
+from models import *
 from fastapi import FastAPI, UploadFile, WebSocket
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -23,35 +25,43 @@ async def page():
     return
 
 
-@app.get("/user")
+@app.get("/user/")
 async def get_user_data(id: int):
     stmt = select(Users).where(Users.id == id) # Запрос в БД
+    user_data = session.scalars(stmt).fetchall()[0]
+    print(user_data)
 
-    user_data = await session.scalars(stmt).fetchall()[0]
-    return {
+    # stmt1 = select(Images).where(Images.user_id == id)
+    # paths = session.scalar(stmt1).path
+
+    stmt = select(Images).where(Images.user_id == id) 
+    paths = session.scalar(stmt).path
+    print(paths)
+    return JSONResponse({
         "id": user_data.id,
         "name": user_data.name,
         "surname": user_data.surname,
         "lastname": user_data.lastname,
         "age": user_data.age,
-        "position_id": user_data.position_id,
+        "departament_id": user_data.departament_id,
         "location_id": user_data.location_id,
         "job_id": user_data.job_id,
-        "last_seen": user_data.last_seen
-    }
+        "last_seen": user_data.last_seen,
+        "images": [paths]
+    })
 
 
-@app.get("/users")
+@app.get("/users/")
 async def get_all_users():
-    stmt = select(Users) # Запрос в БД
+    stmt = select(Users) # Запрос в БД 
 
-    users_list = [{"id": user.id, 
+    users_list = JSONResponse([{"id": user.id, 
                    "name": user.name, 
                    "surname": user.surname, 
                    "lastname": user.lastname, 
                    "job": user.job_id, 
-                   "last_seen": user.lasst_seen}
-                   for user in session.scalars(stmt)]
+                   "last_seen": user.last_seen}
+                   for user in session.scalars(stmt)])
 
     return users_list
 
@@ -60,31 +70,31 @@ async def get_all_users():
 async def get_locations():
     stmt = select(Locations) # Запрос в БД
 
-    locations_list = [{"id": location.id,
+    locations_list = JSONResponse([{"id": location.id,
                         "name": location.name}
-                   for location in session.scalars(stmt)]
+                   for location in session.scalars(stmt)])
 
     return locations_list
 
 
-@app.get("/departaments")
+@app.get("/departaments") #
 async def get_departaments():
     stmt = select(Departaments) # Запрос в БД
 
-    departamenst_list = [{"id": departament.id, 
+    departamenst_list = JSONResponse([{"id": departament.id, 
                           "name": departament.name}
-                   for departament in session.scalars(stmt)]
+                   for departament in session.scalars(stmt)])
 
     return departamenst_list
 
 
 @app.get("/jobs")
-async def get_jobs():
+async def get_jobs(): 
     stmt = select(Jobs) # Запрос в БД
 
-    jobs_list = [{"id": job.id, 
+    jobs_list = JSONResponse([{"id": job.id, 
                   "name": job.name}
-                   for job in session.scalars(stmt)]
+                   for job in session.scalars(stmt)])
 
     return jobs_list
 
@@ -93,11 +103,11 @@ async def get_jobs():
 async def get_events():
     stmt = select(Events) # Запрос в БД
 
-    events_list = [{"id": event.id,
+    events_list = JSONResponse([{"id": event.id,
                     "user_id": event.user_id,
                     "location_id": event.location_id, 
                     "timestamp": event.timestamp}
-                   for event in session.scalars(stmt)]
+                   for event in session.scalars(stmt)])
 
     return events_list 
 
@@ -108,10 +118,10 @@ async def get_image(id: int):
         stmt = select(Images).where(Images.id == id)
         image_path = session.scalars(stmt).one().path
 
-    # async with aiofiles.open()
         return image_path
+    
     except sqlalchemy.exc.NoResultFound:
-        return "No result found"
+        return JSONResponse({"message": "No result found"})
     
 
 @app.put("/image/put") 
@@ -132,6 +142,8 @@ async def upload_image(file: UploadFile, user_id: int):
     session.add(new_image_path)
     session.commit()
 
+    return JSONResponse({"message": "Successful"})
+
 
 @app.delete("/image/delete")
 async def image_delete(id: int):
@@ -143,20 +155,20 @@ async def image_delete(id: int):
     session.commit()
 
     os.remove(image_path)
-
+    # TODO return
+    
 
 @app.post("/user/create")
-async def add_user(name: str, surname: str, lastname: str, position_id: int, 
-                   age: int, location_id: int, job_id: int, last_seen: str):
+async def add_user(params: UserParams):
     new_user = Users(
-        name=name,
-        surname=surname,
-        lastname=lastname,
-        position_id=position_id,
-        age=age,
-        location_id=location_id,
-        job_id=job_id,
-        last_seen=last_seen
+        name=params.name,
+        surname=params.surname,
+        lastname=params.lastname,
+        departament_id=params.departament_id,
+        age=params.age,
+        location_id=params.location_id,
+        job_id=params.job_id,
+        last_seen=dt.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
     )
 
     session.add(new_user)
@@ -164,18 +176,17 @@ async def add_user(name: str, surname: str, lastname: str, position_id: int,
 
 
 @app.post("/user/update")
-async def update_user(id: int, name: str, surname: str, lastname: str, 
-                      position_id: int, age: int, location_id: int, job_id: int):
+async def update_user(id: int, params: UserParams):
     stmt = select(Users).where(Users.id == id) 
     updated_record = session.scalar(stmt).one()
 
-    updated_record.name = name 
-    updated_record.surname = surname
-    updated_record.lastname = lastname
-    updated_record.position_id = position_id
-    updated_record.age = age
-    updated_record.location_id = location_id
-    updated_record.job_id = job_id
+    updated_record.name = params.name 
+    updated_record.surname = params.surname
+    updated_record.lastname = params.lastname
+    updated_record.departament_id = params.departament_id
+    updated_record.age = params.age
+    updated_record.location_id = params.location_id
+    updated_record.job_id = params.job_id
 
     session.commit()
 
@@ -185,6 +196,7 @@ async def delete_user(id: int):
     record_for_delete = session.get(Users, id)
     session.delete(record_for_delete)
     session.commit()
+    # TODO return
 
 
 @app.post("/locations/create")
@@ -275,8 +287,19 @@ async def add_event(user_id: int, location_id: int, timestamp: str):
 
     session.add(new_event)
     session.commit()
+    # TODO Pydantic
 
 
 # @app.websocket("/ws")
 # async def websocket_endpoint(websocket: WebSocket):
 #     await websocket.accept()
+
+
+async def update_lastseen(user_id: int, new_lastseen: str):
+    updated_record = session.get(Users, user_id)
+
+    updated_record.last_seen = new_lastseen
+    session.commit()
+
+# if __name__ == "__main__":
+#     update_lastseen(3, "17-07-2024 16:03:41")

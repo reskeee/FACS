@@ -19,23 +19,23 @@ class Users(Base):
     surname: Mapped[str] = mapped_column(String(STRING_LENGTH))
     lastname: Mapped[str] = mapped_column(String(STRING_LENGTH))
     age: Mapped[int]
-    position_id: Mapped[int]
-    location_id: Mapped[int]
-    job_id: Mapped[int]
-    last_seen: Mapped[str]
+    departament_id: Mapped[int] = mapped_column(ForeignKey("departaments.id"))
+    location_id: Mapped[int] = mapped_column(ForeignKey("locations.id"))
+    job_id: Mapped[int] = mapped_column(ForeignKey("jobs.id"))
+    last_seen: Mapped[str] = mapped_column(String(STRING_LENGTH))
 
     def __repr__(self) -> str:
         return f"Users(id={self.id!r}, name={self.name!r}, surname={self.surname!r},\
- lastname={self.lastname!r}, position_id={self.position_id!r}, age={self.age!r}, location_id={self.location_id!r})"
+                 lastname={self.lastname!r}, departament_id={self.departament_id!r}, age={self.age!r}, location_id={self.location_id!r})"
 
 
 class Events(Base):
     __tablename__ = "events"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int]
-    location_id: Mapped[int]
-    timestamp: Mapped[str]
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    location_id: Mapped[int] = mapped_column(ForeignKey("locations.id"))
+    timestamp: Mapped[str] = mapped_column(String(STRING_LENGTH))
 
     def __repr__(self) -> str:
         return f"Events(id={self.id!r}, user_id={self.user_id!r}, location_id={self.location_id!r}, temistamp={self.timestamp!r})"
@@ -45,11 +45,11 @@ class Images(Base):
     __tablename__ = "images"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int]
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     path: Mapped[str] = mapped_column(String(STRING_LENGTH))
 
     def __repr__(self) -> str:
-        return f"Images(id={self.id!r}, user_id={self.user_id!r}), path={self.path!r}"
+        return f"Images(id={self.id!r}, user_id={self.user_id!r}, path={self.path!r})"
 
 
 class Locations(Base):
@@ -69,7 +69,7 @@ class Departaments(Base):
     title: Mapped[str] = mapped_column(String(STRING_LENGTH))
 
     def __repr__(self) -> str:
-        return f"Positions(id={self.id!r}, title={self.title!r})"
+        return f"Departaments(id={self.id!r}, title={self.title!r})"
 
 
 class Jobs(Base):
@@ -82,5 +82,5 @@ class Jobs(Base):
         return f"Jobs(id={self.id!r}, title={self.title!r})"
 
 
-engine = create_engine("sqlite:///test1.db", echo=True)
+engine = create_engine("sqlite:///test_datetime.db", echo=True)
 session = Session(engine)
