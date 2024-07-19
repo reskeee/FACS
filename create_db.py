@@ -1,6 +1,6 @@
 from db_interaction import *
 
-engine = create_engine("sqlite:///test1.db", echo=True)
+engine = create_engine("sqlite:///test_datetime.db", echo=True)
 session = Session(engine)
 
 Base.metadata.create_all(engine)
@@ -11,28 +11,31 @@ with Session(engine) as session:
         name="Руслан",
         surname="Хаирбеков",
         lastname="Чеченец",
-        position_id=1,
+        departament_id=1,
         age=15,
         location_id=3,
-        job_id=2
+        job_id=2,
+        last_seen="2024-05-03"
     )
     user2 = Users(
         name="Мизеахмед",
         surname="бабахов",
         lastname="ывапролдж",
-        position_id=4,
+        departament_id=4,
         age=17,
         location_id=2,
-        job_id=34
+        job_id=34,
+        last_seen="2024-07-14"
     )
     user3 = Users(
         name="длптшз",
         surname="аапрапт",
         lastname="ыыыыыыыыы",
-        position_id=15,
+        departament_id=15,
         age=1,
         location_id=54,
-        job_id=26
+        job_id=26,
+        last_seen="2024-12-23"
     )
 
     event1 = Events(
