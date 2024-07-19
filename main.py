@@ -148,7 +148,8 @@ async def image_delete(id: int):
     session.commit()
 
     os.remove(image_path)
-    # TODO return
+    
+    return JSONResponse({"message": "Successful"})
     
 
 @app.post("/user/create")
@@ -167,6 +168,8 @@ async def add_user(params: UserParams):
     session.add(new_user)
     session.commit()
 
+    return JSONResponse({"message": "Successful"})
+
 
 @app.post("/user/update")
 async def update_user(id: int, params: UserParams):
@@ -183,20 +186,23 @@ async def update_user(id: int, params: UserParams):
 
     session.commit()
 
+    return JSONResponse({"message": "Successful"})
+
 
 @app.post("/user/delete")
-async def delete_user(params: UserDeleteParams):
-    record_for_delete = session.get(Users, id)
+async def delete_user(params: DeleteParams):
+    record_for_delete = session.get(Users, params.id)
 
     session.delete(record_for_delete)
     session.commit()
-    # TODO return
+
+    return JSONResponse({"message": "Successful"})
 
 
 @app.post("/locations/create")
-async def create_location(new_title: str):
+async def create_location(params: CreateParams):
     new_location = Locations(
-        title=new_title
+        title=params.new_title
     )
 
     session.add(new_location)
@@ -204,84 +210,101 @@ async def create_location(new_title: str):
 
 
 @app.post("/locations/update")
-async def update_location(id: int, new_title: str):
-    stmt = select(Locations).where(Locations.id == id)
+async def update_location(params: UpdateParams):
+    stmt = select(Locations).where(Locations.id == params.id)
     updated_record = session.scalars(stmt).one()
 
-    updated_record.title = new_title
+    updated_record.title = params.new_title
     session.commit()
+
+    return JSONResponse({"message": "Successful"})
 
 
 @app.post("/locations/delete")
-async def delete_location(id: int):
-    record_for_delete = session.get(Locations, id)
+async def delete_location(params: DeleteParams):
+    record_for_delete = session.get(Locations, params.id)
     session.delete(record_for_delete)
     session.commit()
 
+    return JSONResponse({"message": "Successful"})
+
 
 @app.post("/departaments/create")
-async def create_departament(new_title: str):
+async def create_departament(params: CreateParams):
     new_departament = Departaments(
-        title=new_title
+        title=params.new_title
     )
 
     session.add(new_departament)
     session.commit()
 
+    return JSONResponse({"message": "Successful"})
+
 
 @app.post("/departaments/update")
-async def update_departaments(id: int, new_title: str):
-    stmt = select(Departaments).where(Departaments.id == id)
+async def update_departaments(params: UpdateParams):
+    stmt = select(Departaments).where(Departaments.id == params.id)
     updated_record = session.scalars(stmt).one()
 
-    updated_record.title = new_title
+    updated_record.title = params.new_title
     session.commit()
+
+    return JSONResponse({"message": "Successful"})
 
 
 @app.post("/departaments/delete")
-async def delete_departaments(id: int):
-    record_for_delete = session.get(Departaments, id)
+async def delete_departaments(params: DeleteParams):
+    record_for_delete = session.get(Departaments, params.id)
     session.delete(record_for_delete)
     session.commit()
 
+    return JSONResponse({"message": "Successful"})
+
 
 @app.post("/jobs/create")
-async def create_job(new_title: str):
+async def create_job(params: CreateParams):
     new_job = Jobs(
-        title=new_title
+        title=params.new_title
     )
 
     session.add(new_job)
     session.commit()
 
+    return JSONResponse({"message": "Successful"})
+
 
 @app.post("/jobs/update")
-async def update_jobs(id: int, new_title: str):
-    stmt = select(Jobs).where(Jobs.id == id)
+async def update_jobs(params: UpdateParams):
+    stmt = select(Jobs).where(Jobs.id == params.id)
     updated_record = session.scalars(stmt).one()
 
-    updated_record.title = new_title
+    updated_record.title = params.new_title
     session.commit()
+
+    return JSONResponse({"message": "Successful"})
 
 
 @app.post("/jobs/delete")
-async def delete_jobs(id: int):
-    record_for_delete = session.get(Jobs, id)
+async def delete_jobs(params: DeleteParams):
+    record_for_delete = session.get(Jobs, params.id)
     session.delete(record_for_delete)
     session.commit()
 
+    return JSONResponse({"message": "Successful"})
+
 
 @app.post("/events/add")
-async def add_event(user_id: int, location_id: int, timestamp: str):
+async def add_event(params: AddEvent):
     new_event = Events(
-        user_id=user_id,
-        location_id=location_id,
-        timestamp=timestamp
+        user_id=params.user_id,
+        location_id=params.location_id,
+        timestamp=params.timestamp
     )
 
     session.add(new_event)
     session.commit()
-    # TODO Pydantic
+    
+    return JSONResponse({"message": "Successful"})
 
 
 # @app.websocket("/ws")
