@@ -11,4 +11,9 @@ class UserParams(BaseModel):
     job_id: int
 
 
-# class 
+class UserDeleteParams(BaseModel):
+    id: int
+
+
+class EventParams(BaseModel):
+    pass # TODO 

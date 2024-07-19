@@ -25,8 +25,7 @@ class Users(Base):
     last_seen: Mapped[str] = mapped_column(String(STRING_LENGTH))
 
     def __repr__(self) -> str:
-        return f"Users(id={self.id!r}, name={self.name!r}, surname={self.surname!r},\
-                 lastname={self.lastname!r}, departament_id={self.departament_id!r}, age={self.age!r}, location_id={self.location_id!r})"
+        return f"Users(id={self.id!r}, name={self.name!r}, surname={self.surname!r}, lastname={self.lastname!r}, departament_id={self.departament_id!r}, age={self.age!r}, location_id={self.location_id!r})"
 
 
 class Events(Base):
@@ -45,7 +44,7 @@ class Images(Base):
     __tablename__ = "images"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))    
     path: Mapped[str] = mapped_column(String(STRING_LENGTH))
 
     def __repr__(self) -> str:

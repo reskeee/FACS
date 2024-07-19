@@ -4,6 +4,7 @@ import datetime as dt
 import sqlalchemy.exc
 from db_interaction import *
 from models import *
+# from qdrant_test import *
 from fastapi import FastAPI, UploadFile, WebSocket
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -29,13 +30,14 @@ async def page():
 async def get_user_data(id: int):
     stmt = select(Users).where(Users.id == id) # Запрос в БД
     user_data = session.scalars(stmt).fetchall()[0]
-    print(user_data)
+    # print(user_data)
 
     # stmt1 = select(Images).where(Images.user_id == id)
     # paths = session.scalar(stmt1).path
 
     stmt = select(Images)
     paths = [image.path for image in session.scalars(stmt)]
+
     return JSONResponse({
         "id": user_data.id, 
         "name": user_data.name,
@@ -183,8 +185,9 @@ async def update_user(id: int, params: UserParams):
 
 
 @app.post("/user/delete")
-async def delete_user(id: int):
+async def delete_user(params: UserDeleteParams):
     record_for_delete = session.get(Users, id)
+
     session.delete(record_for_delete)
     session.commit()
     # TODO return
@@ -285,6 +288,23 @@ async def add_event(user_id: int, location_id: int, timestamp: str):
 # async def websocket_endpoint(websocket: WebSocket):
 #     await websocket.accept()
 
+
+# @app.post("/api/display")
+# async def frame_interaction(image):
+#     pass
+
+
+# @app.post("/api/embedding")
+# async def embedding_interaction(location_id: int, timestamp, embedding):
+#     result = await min_distance(embedding=embedding)[0] # TODO loc_id и timtstamp приходят. Нужно доставать user_id(payload)
+
+#     new_event = Events(
+#         location_id=location_id,
+#         timestamp=timestamp,
+#         # TODO User_id
+#     )
+
+#     return result
 
 async def update_lastseen(user_id: int, new_lastseen: str):
     updated_record = session.get(Users, user_id)
